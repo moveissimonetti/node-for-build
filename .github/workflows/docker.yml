@@ -12,10 +12,6 @@ jobs:
     name: Push Docker image to Docker Hub (default)
     runs-on: ubuntu-latest
 
-    permissions:
-      packages: write
-      contents: read
-
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -36,7 +32,6 @@ jobs:
           push: true
           tags: |
             coderockr/node-for-build:${{ steps.extract_branch.outputs.branch }}
-            ghcr.io/lucassabreu/bpmn-to-image:${{ steps.extract_branch.outputs.branch }}
 
   push_to_registry_slim:
     name: Push Docker image to Docker Hub (slim)
@@ -61,4 +56,3 @@ jobs:
           push: true
           tags: |
             coderockr/node-for-build:${{ steps.extract_branch.outputs.branch }}-slim
-            ghcr.io/lucassabreu/bpmn-to-image:${{ steps.extract_branch.outputs.branch }}-slim
