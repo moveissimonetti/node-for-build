@@ -1,4 +1,4 @@
-FROM node:16.16.0
+FROM node:18.12.1
 
 RUN  apt-get update \
      && apt-get install -y wget gnupg \

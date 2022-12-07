@@ -29,7 +29,9 @@ jobs:
         with:
           file: Dockerfile
           push: true
-          tags: "coderockr/node-for-build:${{ steps.extract_branch.outputs.branch }}"
+          tags: |
+            coderockr/node-for-build:${{ steps.extract_branch.outputs.branch }}
+            ghcr.io/lucassabreu/bpmn-to-image:${{ steps.extract_branch.outputs.branch }}
 
   push_to_registry_slim:
     name: Push Docker image to Docker Hub (slim)
@@ -52,4 +54,6 @@ jobs:
         with:
           file: Dockerfile.slim
           push: true
-          tags: "coderockr/node-for-build:${{ steps.extract_branch.outputs.branch }}-slim"
+          tags: |
+            coderockr/node-for-build:${{ steps.extract_branch.outputs.branch }}-slim
+            ghcr.io/lucassabreu/bpmn-to-image:${{ steps.extract_branch.outputs.branch }}-slim
