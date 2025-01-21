@@ -32,7 +32,7 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: |
-          echo "branch=$([[ $GITHUB_REF == refs/heads/v* ]] && echo ${GITHUB_REF#refs/heads/v} || echo 'stable')" >> $GITHUB_OUTPUT
+          echo "branch=$([[ $GITHUB_REF == refs/tags/v* ]] && echo ${GITHUB_REF#refs/tags/v} || echo 'stable')" >> $GITHUB_OUTPUT
         id: extract_branch
 
       - name: Push to Docker Hub
@@ -65,7 +65,7 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: |
-          echo "branch=$([[ $GITHUB_REF == refs/heads/v* ]] && echo ${GITHUB_REF#refs/heads/v} || echo 'stable')" >> $GITHUB_OUTPUT
+          echo "branch=$([[ $GITHUB_REF == refs/tags/v* ]] && echo ${GITHUB_REF#refs/tags/v} || echo 'stable')" >> $GITHUB_OUTPUT
         id: extract_branch
 
       - name: Push to Docker Hub
