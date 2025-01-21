@@ -2,7 +2,7 @@ name: Publish Docker image
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - "v[0-9]+.[0-9]+.[0-9]+"
     branches:
       - main
       - 'v\d+'
@@ -14,6 +14,10 @@ jobs:
     name: Push Docker image to Docker Hub (default)
     runs-on: ubuntu-latest
 
+    permissions:
+      packages: write
+      contents: read
+
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -28,21 +32,25 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: |
-          echo "##[set-output name=branch;]$([[ $GITHUB_REF == refs/heads/v* ]] && echo ${GITHUB_REF#refs/heads/v} || echo 'stable')"
+          echo "branch=$([[ $GITHUB_REF == refs/heads/v* ]] && echo ${GITHUB_REF#refs/heads/v} || echo 'stable')" >> $GITHUB_OUTPUT
         id: extract_branch
 
       - name: Push to Docker Hub
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           file: Dockerfile
           push: true
           tags: |
-            coderockr/node-for-build:${{ steps.extract_branch.outputs.branch }}
+            ghcr.io/moveis-simonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}
 
   push_to_registry_slim:
     name: Push Docker image to Docker Hub (slim)
     runs-on: ubuntu-latest
 
+    permissions:
+      packages: write
+      contents: read
+
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -57,13 +65,13 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: |
-          echo "##[set-output name=branch;]$([[ $GITHUB_REF == refs/heads/v* ]] && echo ${GITHUB_REF#refs/heads/v} || echo 'stable')"
+          echo "branch=$([[ $GITHUB_REF == refs/heads/v* ]] && echo ${GITHUB_REF#refs/heads/v} || echo 'stable')" >> $GITHUB_OUTPUT
         id: extract_branch
 
       - name: Push to Docker Hub
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           file: Dockerfile.slim
           push: true
           tags: |
-            coderockr/node-for-build:${{ steps.extract_branch.outputs.branch }}-slim
+            ghcr.io/moveis-simonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}-slim
