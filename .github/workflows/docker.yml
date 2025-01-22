@@ -41,7 +41,7 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            ghcr.io/moveis-simonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}
+            ghcr.io/moveissimonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}
 
   push_to_registry_slim:
     name: Push Docker image to Docker Hub (slim)
@@ -74,4 +74,4 @@ jobs:
           file: Dockerfile.slim
           push: true
           tags: |
-            ghcr.io/moveis-simonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}-slim
+            ghcr.io/moveissimonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}-slim
