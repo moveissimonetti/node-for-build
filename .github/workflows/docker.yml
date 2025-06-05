@@ -11,67 +11,19 @@ on:
 
 jobs:
   push_to_registry_stable:
-    name: Push Docker image to Docker Hub (default)
-    runs-on: ubuntu-latest
-
-    permissions:
-      packages: write
-      contents: read
-
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "branch=$([[ $GITHUB_REF == refs/tags/v* ]] && echo ${GITHUB_REF#refs/tags/v} || echo 'stable')" >> $GITHUB_OUTPUT
-        id: extract_branch
-
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v6
-        with:
-          file: Dockerfile
-          push: true
-          tags: |
-            ghcr.io/moveissimonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}
+    uses: ./.github/workflows/docker.tmpl.yaml
+    secrets: inherit
 
   push_to_registry_slim:
-    name: Push Docker image to Docker Hub (slim)
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/docker.tmpl.yaml
+    with:
+      suffix: slim
+      dockerfile: Dockerfile.slim
+    secrets: inherit
 
-    permissions:
-      packages: write
-      contents: read
-
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "branch=$([[ $GITHUB_REF == refs/tags/v* ]] && echo ${GITHUB_REF#refs/tags/v} || echo 'stable')" >> $GITHUB_OUTPUT
-        id: extract_branch
-
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v6
-        with:
-          file: Dockerfile.slim
-          push: true
-          tags: |
-            ghcr.io/moveissimonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}-slim
+  push_to_registry_gulp_slim:
+    uses: ./.github/workflows/docker.tmpl.yaml
+    with:
+      suffix: gulp-slim
+      dockerfile: Dockerfile.gulp-slim
+    secrets: inherit
