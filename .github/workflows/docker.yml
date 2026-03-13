@@ -1,4 +1,5 @@
 name: Publish Docker image
+
 on:
   push:
     tags:
@@ -10,27 +11,63 @@ on:
       - 'v\d+\.\d+\.\d+'
 
 jobs:
-  push_to_registry_stable:
-    uses: ./.github/workflows/docker.tmpl.yaml
-    secrets: inherit
+  setup:
+    name: Discover Dockerfiles
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set_matrix.outputs.matrix }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
 
-  push_to_registry_slim:
-    uses: ./.github/workflows/docker.tmpl.yaml
-    with:
-      suffix: slim
-      dockerfile: Dockerfile.slim
-    secrets: inherit
+      - name: Find Dockerfiles
+        id: set_matrix
+        run: |
+          matrix_entries="["
+          if [ -f "Dockerfile" ]; then
+            matrix_entries+="{\"suffix\": \"\", \"dockerfile\": \"Dockerfile\"},"
+          fi
+          for f in Dockerfile.*; do
+            if [ -f "$f" ]; then
+              suffix="${f#Dockerfile.}"
+              matrix_entries+="{\"suffix\": \"$suffix\", \"dockerfile\": \"$f\"},"
+            fi
+          done
+          matrix_entries="${matrix_entries%,}]"
+          echo "matrix=$matrix_entries" >> $GITHUB_OUTPUT
 
-  push_to_registry_gulp_slim:
-    uses: ./.github/workflows/docker.tmpl.yaml
-    with:
-      suffix: gulp-slim
-      dockerfile: Dockerfile.gulp-slim
-    secrets: inherit
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    needs: setup
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
 
-  push_to_registry_pnpm:
-    uses: ./.github/workflows/docker.tmpl.yaml
-    with:
-      suffix: pnpm
-      dockerfile: Dockerfile.pnpm
-    secrets: inherit
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract branch name
+        shell: bash
+        run: |
+          echo "branch=$([[ $GITHUB_REF == refs/tags/v* ]] && echo ${GITHUB_REF#refs/tags/v} || echo 'stable')" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v6
+        with:
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/moveissimonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}${{ matrix.suffix && format('-{0}', matrix.suffix) || '' }}
