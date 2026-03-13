@@ -18,7 +18,7 @@ jobs:
       matrix: ${{ steps.set_matrix.outputs.matrix }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Find Dockerfiles
         id: set_matrix
@@ -45,31 +45,8 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
 
-    permissions:
-      packages: write
-      contents: read
-
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "branch=$([[ $GITHUB_REF == refs/tags/v* ]] && echo ${GITHUB_REF#refs/tags/v} || echo 'stable')" >> $GITHUB_OUTPUT
-        id: extract_branch
-
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v6
-        with:
-          file: ${{ matrix.dockerfile }}
-          push: true
-          tags: |
-            ghcr.io/moveissimonetti/node-for-build:${{ steps.extract_branch.outputs.branch }}${{ matrix.suffix && format('-{0}', matrix.suffix) || '' }}
+    uses: ./.github/workflows/docker.tmpl.yaml
+    with:
+      suffix: ${{ matrix.suffix }}
+      dockerfile: ${{ matrix.dockerfile }}
+    secrets: inherit
