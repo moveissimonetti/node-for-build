@@ -14,8 +14,10 @@ jobs:
   setup:
     name: Discover Dockerfiles
     runs-on: ubuntu-latest
+
     outputs:
       matrix: ${{ steps.set_matrix.outputs.matrix }}
+
     steps:
       - name: Check out the repo
         uses: actions/checkout@v6
@@ -37,16 +39,16 @@ jobs:
           echo "matrix=$matrix_entries" >> $GITHUB_OUTPUT
 
   push_to_registry:
-    name: Push Docker image to Docker Hub
-    runs-on: ubuntu-latest
+    name: Push Docker image to Docker Hub (${{ matrix.dockerfile }})
     needs:
       - setup
+
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
 
     uses: ./.github/workflows/docker.tmpl.yaml
+    secrets: inherit
     with:
       suffix: ${{ matrix.suffix }}
       dockerfile: ${{ matrix.dockerfile }}
-    secrets: inherit
