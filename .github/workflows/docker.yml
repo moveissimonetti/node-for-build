@@ -27,3 +27,10 @@ jobs:
       suffix: gulp-slim
       dockerfile: Dockerfile.gulp-slim
     secrets: inherit
+
+  push_to_registry_pnpm:
+    uses: ./.github/workflows/docker.tmpl.yaml
+    with:
+      suffix: pnpm
+      dockerfile: Dockerfile.pnpm
+    secrets: inherit
